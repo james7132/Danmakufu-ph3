@@ -1,0 +1,193 @@
+#東方弾幕風[Single]
+#ScriptVersion[3]
+#Title["SamplePS03"]
+#Text["SamplePS03：ピクセルシェーダ：ボス周囲のゆらぎエフェクト"]
+#Background["script/default_system/Default_Background_IceMountain.txt"]
+
+
+//デフォルト弾画像をロード
+#include"script/default_system/Default_ShotConst.txt"
+
+//----------------------------------------------------
+//グローバル変数宣言
+//この位置で宣言した変数はスクリプト全体で有効です。
+//ただしこの箇所での変数への代入は、定数以外の代入は行えません。
+//(実行順序が保障されないため乱数などの使用はできません)
+//----------------------------------------------------
+let objEnemy; //敵オブジェクト
+let objPlayer; //自機オブジェクト
+let frame = 0; //敵動作に使用するカウンタ(@MainLoopで1づつ増加させます)
+
+//----------------------------------------------------
+//敵の動作
+//----------------------------------------------------
+@Event
+{
+	alternative(GetEventType())
+	case(EV_REQUEST_LIFE)
+	{
+		//敵ライフを要求された
+		SetScriptResult(500);//ライフを500に設定
+	}
+}
+
+@Initialize
+{
+	//自機オブジェクト取得
+	objPlayer = GetPlayerObjectID();
+
+	//敵オブジェクトを生成し登録
+	objEnemy = ObjEnemy_Create(OBJ_ENEMY_BOSS);
+	ObjEnemy_Regist(objEnemy);
+
+	//敵画像の設定
+	let imgExRumia = GetCurrentScriptDirectory ~ "ExRumia.png"; //敵画像ファイル
+	ObjPrim_SetTexture(objEnemy, imgExRumia); //画像ファイルを読み込む
+	ObjSprite2D_SetSourceRect(objEnemy, 64, 1, 127, 64); //描画元矩形を(64,1) - (127,64)に設定
+	ObjSprite2D_SetDestCenter(objEnemy); //描画先を中心(0, 0)に設定
+
+	//座標(cx, 120)へ60フレームかけて移動する
+	let cx = GetStgFrameWidth() / 2;//STGシーンの中心x座標を取得
+	ObjMove_SetDestAtFrame(objEnemy, cx, 120, 60);
+
+	//let objScene = GetEnemyBossSceneObjectID();
+	//ObjEnemyBossScene_StartSpell(objScene);
+
+	TWaveCircle();
+}
+
+@MainLoop
+{
+	//敵の座標を取得
+	let ex = ObjMove_GetX(objEnemy);
+	let ey = ObjMove_GetY(objEnemy);
+
+	if(frame == 90)
+	{
+		let px = GetPlayerX();
+		ObjMove_SetDestAtFrame(objEnemy, rand(192-100, 192+100), rand(50, 200), 60);
+	}
+
+	if(frame == 180)
+	{
+		//frameが180になったら実行される部分
+		//自機の座標を取得
+		let px = GetPlayerX();
+		let py = GetPlayerY();
+
+		//敵からみた自機方向の角度を求める。
+		let angleToPlayer = atan2(py - ey, px - ex);
+
+		//angleを-30から15ずつ増加させ5WAYにする
+		let angle=0;
+		while(angle<360)
+		{//(angle：15°間隔で0～360まで)
+			//一定時間で自機方向へ角度を変える弾
+			//弾を作成する。
+			let obj = CreateShotA2(ex, ey, 5, angle, -0.10, 1, DS_RICE_S_BLUE, 30);
+			//発射後60フレーム目に、自機方向を基準に角度変更するように設定
+			ObjMove_AddPatternA4(obj, 60, 3, 0, 0, 0, 3, objPlayer, NO_CHANGE);
+			angle += 15;
+		}
+
+		frame = 0;//弾を出したらframeを0にする
+	}
+
+	//当たり判定登録
+	ObjEnemy_SetIntersectionCircleToShot(objEnemy, ex, ey, 32);//当たり判定(自機弾用)登録
+	ObjEnemy_SetIntersectionCircleToPlayer(objEnemy, ex, ey, 24);//当たり判定(体当たり用)登録
+
+	//カウンタに1追加
+	frame++;
+
+	//ライフ0処理
+	if(ObjEnemy_GetInfo(objEnemy, INFO_LIFE) <= 0)
+	{
+		//ライフが0になったら即座に終了
+		//本来は爆発エフェクトのタスクを登録し、
+		//エフェクト終了を待って、スクリプトを終了します。
+		yield;
+		Obj_Delete(objEnemy);
+		CloseScript(GetOwnScriptID());
+		return;
+	}
+
+	yield;
+}
+
+
+//----------------------------------------------------
+//ボス周囲のゆらぎエフェクト
+//----------------------------------------------------
+task TWaveCircle()
+{
+	//レンダリングターゲットに使用するテクスチャ
+	let renderTexture = GetReservedRenderTargetName(0);
+
+	let frame = 0; //フレーム
+	let baseEffectRadius = 128; //基準エフェクト半径
+	let outerFluct = 16; //エフェクト半径の最大変化量
+	let effectRadius = 0; //エフェクト半径
+
+
+	let priEffectMin = 20; //エフェクトをかける最小優先度
+	let priEffectMax = 28; //エフェクトをかける最大優先度
+
+	//背景のみエフェクトの対象とする
+	//エフェクトの描画でまかなえるため、
+	//優先度20～28の通常描画を無効にする。
+	SetInvalidRenderPriorityA1(priEffectMin, priEffectMax);
+
+	let frameWidth = GetStgFrameWidth();
+	let frameHeight = GetStgFrameHeight();
+	let frameLeft = GetStgFrameLeft();
+	let frameRight = frameLeft + frameWidth;
+	let frameTop = GetStgFrameTop();
+	let frameBottom = frameTop + frameHeight;
+
+
+	//--------------------------------
+	//ゆがみオブジェクト
+	let objWave = ObjPrim_Create(OBJ_SPRITE_2D); //2Dスプライトオブジェクト生成
+	Obj_SetRenderPriorityI(objWave, 25); //描画優先度を設定
+	ObjPrim_SetTexture(objWave, renderTexture); //テクスチャを設定
+	ObjSprite2D_SetSourceRect(objWave, frameLeft, frameTop, frameRight, frameBottom);
+	ObjSprite2D_SetDestRect(objWave, 0, 0, frameWidth, frameHeight);
+	Obj_SetRenderPriorityI(objWave, priEffectMax + 1);
+
+	//ゆがみオブジェクトにシェーダを設定
+	let pathShader = GetCurrentScriptDirectory ~ "SamplePS03_HLSL.txt";
+	ObjShader_SetShaderF(objWave, pathShader);
+	ObjShader_SetTechnique(objWave, "TecWave");
+
+
+	//ボスのライフが0になるまでエフェクトをかける。
+	let objEnemy = GetEnemyBossObjectID[0];
+	while(ObjEnemy_GetInfo(objEnemy, INFO_LIFE) > 0)
+	{
+		//エフェクト半径
+		effectRadius = baseEffectRadius + outerFluct * sin(frame*4);
+
+		let enemyX = ObjMove_GetX(objEnemy); //敵座標X
+		let enemyY = ObjMove_GetY(objEnemy); //敵座標Y
+
+		//--------------------------------
+		//優先度20～28(背景)をエフェクト用のテクスチャに描画
+		//シェーダ解除
+		RenderToTextureA1(renderTexture, priEffectMin, priEffectMax, true);
+
+		//--------------------------------
+		//シェーダにパラメータを設定
+		ObjShader_SetFloat(objWave, "frame_", frame);
+		ObjShader_SetFloat(objWave, "enemyX_", enemyX + frameLeft);
+		ObjShader_SetFloat(objWave, "enemyY_", enemyY + frameTop);
+		ObjShader_SetFloat(objWave, "waveRadius_", effectRadius);
+
+		frame++;
+		yield;
+	}
+
+	//エフェクト用オブジェクト削除
+	Obj_Delete(objWave);
+	ClearInvalidRenderPriority();
+}

@@ -1,0 +1,61 @@
+
+--ライセンスなど--------
+●デフォルト弾画像
+　えむ氏サイトより引用
+　　■ここに置いてある画像は一次製作元(上海アリス幻樂団さん)に
+　　迷惑がかからない範囲であれば無断で引用転載加工配布等して頂いて構いません。
+
+　　弾幕風等にご利用の場合は、この画像が上海アリス幻樂団さんの作品の
+　　二次創作である旨、明記をお願いします。
+
+　　■【重要】[※]のついた画像は、danmaqさんの
+　　　東方夢終劇～Concealed the Conclusion　用に製作し、また
+　　使用したものを、まく氏の許可を得て素材として公開しています。
+
+　　その画像を使用したスクリプト等を公開する際には、
+　　「東方Project（上海アリス幻楽団さん）の二次創作である
+　　東方夢終劇（danmaqさん）内の画像を使用しております」
+　　といった感じに、出所と一次創作元についての記述を
+　　readme.txt等に入れて頂けるようお願いします。
+
+
+●背景画像など
+　デジタル素材の部屋
+　http://yosaku12.cool.ne.jp/
+
+●エフェクト用画像
+　507@GW氏
+
+
+●擬似乱数生成器(Mersenne twister)
+　Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
+　University. All rights reserved.
+
+　Redistribution and use in source and binary forms, with or without
+　modification, are permitted provided that the following conditions are
+　met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of the Hiroshima University nor the names of
+      its contributors may be used to endorse or promote products
+      derived from this software without specific prior written
+      permission.
+
+　THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+　"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+　LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+　A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+　OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+　SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+　LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+　DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+　THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+　(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+　OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+

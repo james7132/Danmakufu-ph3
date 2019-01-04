@@ -1,0 +1,40 @@
+#東方弾幕風[Stage]
+#ScriptVersion[3]
+#Title["SamplePS01"]
+#Text["SamplePS01：ピクセルシェーダ：モノトーン"]
+#Background["script/default_system/Default_Background_IceMountain.txt"]
+
+@Initialize
+{
+	TSamplePS1();
+}
+
+@MainLoop
+{
+	yield;
+}
+
+task TSamplePS1
+{
+	//パス設定
+	let dir = GetCurrentScriptDirectory();
+	let pathShader = dir ~ "SamplePS01_HLSL.txt";
+
+	//シェーダ生成
+	let objShader = ObjShader_Create();
+	ObjShader_SetShaderF(objShader, pathShader);
+	ObjShader_SetTechnique(objShader, "TecMonotone");
+
+	loop
+	{
+		//特定の描画優先度にシェーダを適応
+		SetShaderI(objShader, 0, 100);
+		loop(180){yield;}
+
+		//シェーダ解除
+		ResetShaderI(0, 100);
+		loop(180){yield;}
+	}
+
+}
+

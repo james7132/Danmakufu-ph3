@@ -1,0 +1,59 @@
+//================================================================
+//大域設定値
+//Texture
+sampler sampler0_ : register(s0);
+
+//================================================================
+//--------------------------------
+//ピクセルシェーダ入力値
+struct PS_INPUT
+{
+	float4 diffuse : COLOR0;  //ディフューズ色
+	float2 texCoord : TEXCOORD0; //テクスチャ座標
+	float2 vPos : VPOS; //描画先座標
+};
+
+//--------------------------------
+//ピクセルシェーダ出力値
+struct PS_OUTPUT
+{
+    float4 color : COLOR0; //出力色
+};
+
+
+//================================================================
+// シェーダ
+//--------------------------------
+//ピクセルシェーダ
+PS_OUTPUT PsMonotone( PS_INPUT In ) : COLOR0
+{
+	PS_OUTPUT Out;
+
+	//テクスチャの色
+	float4 colorTexture = tex2D(sampler0_, In.texCoord);
+
+	//頂点ディフーズ色
+	float4 colorDiffuse = In.diffuse;
+
+	//合成
+	float4 color = colorTexture * colorDiffuse;
+
+	//モノトーンの計算
+	Out.color.rgb = ( color.r + color.g + color.b ) * 0.3333f;
+	Out.color.a = color.a;
+
+	return Out;
+}
+
+
+//================================================================
+//--------------------------------
+//technique
+technique TecMonotone
+{
+	pass P0
+	{
+		PixelShader = compile ps_3_0 PsMonotone();
+	}
+}
+
